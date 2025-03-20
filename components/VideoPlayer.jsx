@@ -1,6 +1,13 @@
+// components/VideoPlayer.jsx
+
 import React, { useRef, useState, useEffect } from "react";
 import { View, StyleSheet, Dimensions, Text, ActivityIndicator, TouchableOpacity, Modal } from "react-native";
 import Video from "react-native-video";
+import muxReactNativeVideo from "@mux/mux-data-react-native-video";
+import app from "../package.json"; // Adjust path if necessary
+
+// Wrap the react-native-video component with Mux Data SDK functionality
+const MuxVideo = muxReactNativeVideo(Video);
 
 // Get screen dimensions
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -9,7 +16,7 @@ export default function VideoPlayer({ originalUrl }) {
   const videoRef = useRef(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [videoAspect, setVideoAspect] = useState(16/9); // Default aspect ratio
+  const [videoAspect, setVideoAspect] = useState(16 / 9); // Default aspect ratio
   const [videoHeight, setVideoHeight] = useState(0);
   const [videoWidth, setVideoWidth] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
@@ -122,7 +129,7 @@ export default function VideoPlayer({ originalUrl }) {
         <Text style={styles.errorText}>{error}</Text>
       ) : (
         <>
-          <Video
+          <MuxVideo
             ref={videoRef}
             source={{ uri: originalUrl }}
             style={styles.video}
@@ -132,6 +139,18 @@ export default function VideoPlayer({ originalUrl }) {
             onError={handleError}
             onLoad={handleLoad}
             onProgress={handleProgress}
+            // Add Mux Data monitoring options
+            muxOptions={{
+              application_name: app.name,          // Required: Your application name
+              application_version: app.version,    // Recommended: Your application version
+              data: {
+                env_key: 'YOUR_ENVIRONMENT_KEY',   // Required: Replace with your actual environment key
+                player_software_version: '5.0.2',    // Recommended: Version of react-native-video
+                player_name: 'React Native Player',  // Player name (refer to Mux metadata docs for more fields)
+                video_id: 'My Video Id',
+                video_title: 'My awesome video',
+              },
+            }}
           />
           {loading && (
             <View style={styles.loadingContainer}>
